@@ -4,19 +4,21 @@
 #define DIRECTORY "/sys/class/power_supply/"
 #define DEVICE "BAT0/"
 
-float read_file_as_float(char directory[])
+float read_file_as_float(char file[])
 {
     float result;
 
     FILE *file = fopen(directory, "r");
 
     if(file == NULL)
-    { /* TODO: Output text here. */
+    {
+        fprintf(stderr, "Failed to open file: %s", file);
         exit(EXIT_FAILURE);
     }
 
     if(fscanf(file, "%f", &result) < 1)
-    { /* TODO: Output text here. */
+    {
+        fprintf(stderr, "Failed to scan file: %s", file);
         exit(EXIT_FAILURE);
     }
 
