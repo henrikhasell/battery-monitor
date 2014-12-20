@@ -29,7 +29,7 @@ int calculate_percentage(float curr, float full)
 
 void print_percentage(int percentage)
 {
-    printf("%s%i%%\x1b[0m\n",
+    printf("%s%i%%\x1b[0m",
         percentage >= 70
             ? "\x1b[0;32m"
             : percentage >= 40
