@@ -1,41 +1,54 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define DIRECTORY "/sys/class/power_supply/"
-#define DEVICE "BAT0/"
+#define PATH "/sys/class/power_supply/BAT0/"
 
-float read_file_as_float(char file[])
-{
-    float result;
-
-    FILE *file = fopen(directory, "r");
+void read_float(char path[], float *result)
+{ /* Attempt to open the file (path) for reading. */
+    FILE *file = fopen(path, "r");
 
     if(file == NULL)
-    {
-        fprintf(stderr, "Failed to open file: %s", file);
+    { /* If file failed to open, print error and exit. */
+        fprintf(stderr, "Failed to open file: %s", path);
         exit(EXIT_FAILURE);
     }
 
-    if(fscanf(file, "%f", &result) < 1)
-    {
-        fprintf(stderr, "Failed to scan file: %s", file);
+    if(fscanf(file, "%f", result) < 1)
+    { /* If read failed, print error and exit. */
+        fprintf(stderr, "Failed to scan file: %s", path);
         exit(EXIT_FAILURE);
     }
 
-    fclose(file);
-
-    return result;
+    fclose(file); /* Close file. */
 }
 
 int calculate_percentage(float curr, float full)
-{
+{ /* Calculate the (rounded) battery percentage. */
     return (int)(curr / full * 100.0f + 0.5f);
+}
+
+void print_percentage(int percentage)
+{
+    printf("%s%i%%\x1b[0m\n",
+        percentage >= 70
+            ? "\x1b[0;32m"
+            : percentage >= 40
+                ? "\x1b[0;35m"
+                : "\x1b[5;31m",
+        percentage
+    );
 }
 
 int main(int argc, char *argv[])
 {
-    float full = read_file_as_float(DIRECTORY DEVICE "charge_full");
-    float curr = read_file_as_float(DIRECTORY DEVICE "charge_now");
-    printf("%i%%\n", calculate_percentage(curr, full));
+    float curr;
+    float full;
+
+    read_float(PATH "charge_now", &curr);
+    read_float(PATH "charge_full", &full);
+
+    print_percentage(
+        calculate_percentage(curr, full));
+
     return EXIT_SUCCESS;
 }
