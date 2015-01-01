@@ -1,7 +1,12 @@
+#include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 #define PATH "/sys/class/power_supply/BAT0/"
+
+bool newline = true;
+bool colour = true;
 
 void read_float(char path[], float *result)
 { /* Attempt to open the file (path) for reading. */
@@ -29,20 +34,47 @@ int calculate_percentage(float curr, float full)
 
 void print_percentage(int percentage)
 {
-    printf("%s%i%%\x1b[0m",
-        percentage >= 70
-            ? "\x1b[0;32m"
-            : percentage >= 40
-                ? "\x1b[0;35m"
-                : "\x1b[5;31m",
-        percentage
-    );
+    if(colour == true)
+    {
+        printf("%s%i%%\x1b[0m",
+            percentage >= 70
+                ? "\x1b[0;32m"
+                : percentage >= 40
+                    ? "\x1b[0;35m"
+                    : "\x1b[5;31m",
+            percentage
+        );
+    }
+    else
+    {
+        printf("%i%%", percentage);
+    }
+
+    if(newline == true)
+    {
+        printf("\n");
+    }
 }
 
 int main(int argc, char *argv[])
 {
     float curr;
     float full;
+
+    for(int i = 0; i < argc; i++)
+    {/* Arguments passed to the
+    program will be parsed here. */
+        if(strcmp(argv[i], "-n") == 0)
+        {/* Set the newline boolean. */
+            newline = false;
+            continue;
+        }
+        if(strcmp(argv[i], "-b") == 0)
+        {/* Set the colour boolean. */
+            colour = false;
+            continue;
+        }
+    }
 
     read_float(PATH "charge_now", &curr);
     read_float(PATH "charge_full", &full);
